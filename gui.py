@@ -116,6 +116,7 @@ class App(ctk.CTk):
         # Count the number of tokens
         print("Job listing is " + str(num_tokens) + " tokens")
         parsed_listing = self.extract_relevant_info(self.listing)
+        print(type(parsed_listing))
         self.generate_response(parsed_listing, self.input_pdf)
 
     def extract_listing(self, url):
@@ -143,7 +144,7 @@ class App(ctk.CTk):
                 {"role": "user", "content": listing}
             ]
         )
-        return completion.choices[0].message
+        return completion.choices[0].message.content
 
     def generate_response(self, listing, resume):
         completion = client.chat.completions.create(
@@ -154,7 +155,7 @@ class App(ctk.CTk):
                 {"role": "user", "content": listing}
             ]
         )
-        print(completion.choices[0].message)
+        print(completion.choices[0].message.content)
 
         
 if __name__ == "__main__":
