@@ -8,6 +8,8 @@ from selenium import webdriver
 import tiktoken
 from pdfminer.high_level import extract_text
 
+from openai import OpenAI
+client = OpenAI()
 
 warnings.filterwarnings("ignore", message=".*CTkImage.*HighDPI displays.*")
 
@@ -112,10 +114,9 @@ class App(ctk.CTk):
         encoding = tiktoken.get_encoding("o200k_base")
         num_tokens = len(encoding.encode(self.listing))
         # Count the number of tokens
-        print("Job listing is " +str(num_tokens)+ " tokens")
-        print(self.listing)
-        print(self.input_pdf)
-
+        print("Job listing is " + str(num_tokens) + " tokens")
+        parsed_listing = self.extract_relevant_info(self.listing)
+        self.generate_response(parsed_listing, self.input_pdf)
 
     def extract_listing(self, url):
         # initialize a new browser (in this case, we're using Chrome)
@@ -134,6 +135,28 @@ class App(ctk.CTk):
     def test_resume(self):
         print("TEST")
 
+    def extract_relevant_info(self, listing):
+        completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are going to extract information specific to the job listing you are provided exactly as you see it."},
+                {"role": "user", "content": listing}
+            ]
+        )
+        return completion.choices[0].message
+
+    def generate_response(self, listing, resume):
+        completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You're an experienced writer who specializes in crafting personalized cover letters and resumes that are tailored to specific job listings. Your goal is to highlight the candidate's relevant experience, skills, and achievements that directly align with the job requirements. Ensure the cover letter amd resume effectively communicates the candidate's suitability for the position and their enthusiasm for the role. Do not make up any credentials for the candidate."},
+                {"role": "user", "content": resume},
+                {"role": "user", "content": listing}
+            ]
+        )
+        print(completion.choices[0].message)
+
+        
 if __name__ == "__main__":
     app = App()
     app.mainloop()
