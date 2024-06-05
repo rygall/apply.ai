@@ -13,11 +13,19 @@ def set_paragraph_spacing(paragraph, space_before=0, space_after=0, line_spacing
     spacing.set(qn('w:line'), str(line_spacing * 240))  # 240 is the default line height unit
     p_pr.append(spacing)
 
+
+applicant_name = 'FILL IN APPLICANT NAME'
+applicant_town_and_state = 'FILL IN APPLICANT TOWN AND STATE'
+applicant_phone_number = 'FILL IN APPLICANT NUMBER'
+applicant_personal_email_address = 'FILL IN APPLICANT PERSONAL EMAIL ADDRESS'
+applicant_work_email_address = 'FILL IN APPLICANT WORK EMAIL ADDRESS'
+
+
 # Create a new Document
 doc = Document()
 
 # Add a title
-title = doc.add_heading('Ryan Gallagher', 0)
+title = doc.add_heading(applicant_name, 0)
 title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 set_paragraph_spacing(title, space_before=0, space_after=240)  # Add some space after the title
 
@@ -25,15 +33,16 @@ set_paragraph_spacing(title, space_before=0, space_after=240)  # Add some space 
 contact_info = doc.add_paragraph()
 contact_info.alignment = WD_ALIGN_PARAGRAPH.CENTER
 set_paragraph_spacing(contact_info, space_before=0, space_after=240)  # Add some space after contact info
-contact_info.add_run('Media, PA | ').bold = True
-contact_info.add_run('(610) 731-3822 | ')
-contact_info.add_run('ryan.gallagher900@gmail.com | ')
-contact_info.add_run('gallagherj1@leidos.com')
+contact_info.add_run(applicant_town_and_state + ' | ').bold = True
+contact_info.add_run(applicant_phone_number + ' | ')
+contact_info.add_run(applicant_personal_email_address + ' | ')
+contact_info.add_run(applicant_work_email_address)
 
 # Add a section for experience
 experience_heading = doc.add_heading('Experience', level=1)
 set_paragraph_spacing(experience_heading, space_before=240, space_after=120)
 
+# FILL IN APPLICANTS EXPERIENCE
 experience = [
     {
     },
@@ -54,6 +63,7 @@ for exp in experience:
 education_heading = doc.add_heading('Education', level=1)
 set_paragraph_spacing(education_heading, space_before=240, space_after=120)
 
+# FILL IN APPLICANTS EDUCATION
 education = [
     {
     },
@@ -87,15 +97,8 @@ skills_run = skills_paragraph.add_run()
 for skill in skills:
     skills_run.add_text(f"{skill['area']}: {skill['description']}  |  ")
 
-# Add a section for other activities
-activities_heading = doc.add_heading('Other Activities', level=1)
-set_paragraph_spacing(activities_heading, space_before=240, space_after=120)
-activities_description = "Fly Fishing, Amateur Radio, Reading, Cooking, Traditional Folk Music, Guitar, Soccer, Skiing"
-activities_paragraph = doc.add_paragraph(activities_description)
-set_paragraph_spacing(activities_paragraph, space_before=0, space_after=0)
-
 # Save the document
-output_path = 'Ryan_Gallagher_Resume.docx'
+output_path = 'Resume.docx'
 doc.save(output_path)
 
 print(f"Document saved as {output_path}")
