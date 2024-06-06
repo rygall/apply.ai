@@ -103,7 +103,7 @@ class App(ctk.CTk):
         self.listing = self.extract_listing(url)
 
         # Convert PDF Resume Text
-        self.input_pdf = self.pdf_to_text(pdf_path)
+        self.input_pdf_text = self.pdf_to_text(pdf_path)
 
         output_text = f"Processed URL: {url} \n PDF: {pdf_path}"
         self.output_box.configure(state='normal')
@@ -115,9 +115,18 @@ class App(ctk.CTk):
         num_tokens = len(encoding.encode(self.listing))
         # Count the number of tokens
         print("Job listing is " + str(num_tokens) + " tokens")
+        
         parsed_listing = self.extract_relevant_info(self.listing)
-        print(type(parsed_listing))
-        self.generate_response(parsed_listing, self.input_pdf)
+        print("======PARSED LISTING======")
+        print(parsed_listing)
+        print("======END PARSED LISTING======")
+
+        response = self.generate_response(parsed_listing, self.input_pdf_text)
+        print("======PARSED LISTING======")
+        print(response)
+        print("======END PARSED LISTING======")
+
+        self.fill_in_doc(response)
 
     def extract_listing(self, url):
         # initialize a new browser (in this case, we're using Chrome)
@@ -133,38 +142,47 @@ class App(ctk.CTk):
         text = extract_text(pdf_path)
         return text
 
-    def test_resume(self):
-        print("TEST")
-
     def extract_relevant_info(self, listing):
         completion = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are going to extract information specific to the job listing that is contained with a string you are provided. Extract the information exactly as you see it."},
+                {"role": "system", "content": "You are going to extract information specific to the job listing that is contained with a string you are provided. Extract the relevant information exactly as you see it."},
                 {"role": "user", "content": listing}
             ]
         )
         return completion.choices[0].message.content
 
     def generate_response(self, listing, resume):
-        template_cv = None
-        template_res = None
-        with open("template_cv.py", 'r') as file:
-            template_cv = file.read()
-        with open("template_res.py", 'r') as file:
-            template_res = file.read()
         completion = client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You're an experienced writer who specializes in crafting personalized cover letters and resumes that are tailored to specific job listings. Your goal is to highlight the candidate's relevant experience, skills, and achievements that directly align with the job requirements. Do not make up any credentials for the candidate."},
                 {"role": "user", "content": resume},
                 {"role": "user", "content": listing},
-                {"role": "user", "content": "I am also going to provide you with a template for a resume and cover letter that I want you to fill in with the information you generate for the resume and cover letter."},
+            ]
+        )
+        return completion.choices[0].message.content
+
+    def fill_in_doc(self, response):
+        template_cv = None
+        template_res = None
+        with open("template_cv.py", 'r') as file:
+            template_cv = file.read()
+        with open("template_res.py", 'r') as file:
+            template_res = file.read()
+      
+        completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are an intelligent assistant with a focus on processing and integrating textual information."},
+                {"role": "user", "content": "You will be provided with Python code that generates templates for a resume and a cover letter. You will also be provided text for a resume and a cover letter. Using the text for the resume and cover letter, fill in the respective templates accurately."},
+                {"role": "user", "content": response},
                 {"role": "user", "content": template_cv},
                 {"role": "user", "content": template_res},
             ]
         )
         print(completion.choices[0].message.content)
+
 
         
 if __name__ == "__main__":
