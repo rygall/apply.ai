@@ -122,9 +122,9 @@ class App(ctk.CTk):
         print("======END PARSED LISTING======")
 
         response = self.generate_response(parsed_listing, self.input_pdf_text)
-        print("======PARSED LISTING======")
+        print("\n\n======RESPONSE======")
         print(response)
-        print("======END PARSED LISTING======")
+        print("======END RESPONSE======")
 
         self.fill_in_doc(response)
 
@@ -148,7 +148,8 @@ class App(ctk.CTk):
             messages=[
                 {"role": "system", "content": "You are going to extract information specific to the job listing that is contained with a string you are provided. Extract the relevant information exactly as you see it."},
                 {"role": "user", "content": listing}
-            ]
+            ],
+            temperature=0.2
         )
         return completion.choices[0].message.content
 
@@ -156,7 +157,8 @@ class App(ctk.CTk):
         completion = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You're an experienced writer who specializes in crafting personalized cover letters and resumes that are tailored to specific job listings. Your goal is to highlight the candidate's relevant experience, skills, and achievements that directly align with the job requirements. Do not make up any credentials for the candidate."},
+                {"role": "system", "content": "You're an experienced writer who specializes in getting people the jobs that they want."},
+                {"role": "user", "content": "I am going to provide you with my resume and a job listing, please provide me with a tailored resume and cover letter. Don't make anything up about me."},
                 {"role": "user", "content": resume},
                 {"role": "user", "content": listing},
             ]
@@ -175,11 +177,12 @@ class App(ctk.CTk):
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are an intelligent assistant with a focus on processing and integrating textual information."},
-                {"role": "user", "content": "You will be provided with Python code that generates templates for a resume and a cover letter. You will also be provided text for a resume and a cover letter. Using the text for the resume and cover letter, fill in the respective templates accurately."},
-                {"role": "user", "content": response},
+                {"role": "user", "content": "You will be provided with Python code that generates templates for a resume and a cover letter. You will also be provided text for a resume and a cover letter. Using the text for the resume and cover letter, fill in the respective templates accurately. Keep changes of the format of the document to a minimum."},
                 {"role": "user", "content": template_cv},
                 {"role": "user", "content": template_res},
-            ]
+                {"role": "user", "content": response},
+            ],
+            temperature=0.5
         )
         print(completion.choices[0].message.content)
 
