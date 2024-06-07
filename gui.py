@@ -103,7 +103,7 @@ class App(ctk.CTk):
         self.listing = self.extract_listing(url)
 
         # Convert PDF Resume Text
-        self.input_pdf_text = self.pdf_to_text(pdf_path)
+        input_pdf_text = self.pdf_to_text(pdf_path)
 
         output_text = f"Processed URL: {url} \n PDF: {pdf_path}"
         self.output_box.configure(state='normal')
@@ -121,12 +121,8 @@ class App(ctk.CTk):
         print(parsed_listing)
         print("======END PARSED LISTING======")
 
-        response = self.generate_response(parsed_listing, self.input_pdf_text)
-        print("\n\n======RESPONSE======")
-        print(response)
-        print("======END RESPONSE======")
-
-        self.fill_in_doc(response)
+        self.generate_resume(parsed_listing, input_pdf_text)
+        self.generate_cv(parsed_listing, input_pdf_text)
 
     def extract_listing(self, url):
         # initialize a new browser (in this case, we're using Chrome)
@@ -146,45 +142,70 @@ class App(ctk.CTk):
         completion = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are going to extract information specific to the job listing that is contained with a string you are provided. Extract the relevant information exactly as you see it."},
+                {"role": "system", "content": "You are an expert at parsing through data and extracting relevant information."},
+                {"role": "user", "content": "You are going to be provided a large string, within that string is information on a job listing. Extract all information for the job listing."},
                 {"role": "user", "content": listing}
             ],
-            temperature=0.2
+            temperature=0.7
         )
         return completion.choices[0].message.content
 
-    def generate_response(self, listing, resume):
-        completion = client.chat.completions.create(
+    def generate_resume(self, listing, resume):
+        resume_text = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You're an experienced writer who specializes in getting people the jobs that they want."},
-                {"role": "user", "content": "I am going to provide you with my resume and a job listing, please provide me with a tailored resume and cover letter. Don't make anything up about me."},
+                {"role": "system", "content": "You're an experienced writer who specializes in assisting people with job applications."},
+                {"role": "user", "content": "I am going to provide you with my resume and a job listing, please provide me with a resume that is tweaked for the job listing. Don't make anything up about me."},
                 {"role": "user", "content": resume},
                 {"role": "user", "content": listing},
-            ]
+            ],
+            temperature=1
         )
-        return completion.choices[0].message.content
 
-    def fill_in_doc(self, response):
-        template_cv = None
         template_res = None
-        with open("template_cv.py", 'r') as file:
-            template_cv = file.read()
         with open("template_res.py", 'r') as file:
             template_res = file.read()
-      
-        completion = client.chat.completions.create(
+
+        resume_code = client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are an intelligent assistant with a focus on processing and integrating textual information."},
-                {"role": "user", "content": "You will be provided with Python code that generates templates for a resume and a cover letter. You will also be provided text for a resume and a cover letter. Using the text for the resume and cover letter, fill in the respective templates accurately. Keep changes of the format of the document to a minimum."},
-                {"role": "user", "content": template_cv},
+                {"role": "user", "content": "You will be provided with Python code that generates a template for a resume. You will also be provided text for a cover letter. Fill in the template using the provided text for the cover letter. Keep changes to the format of the document to a minimum."},
                 {"role": "user", "content": template_res},
-                {"role": "user", "content": response},
+                {"role": "user", "content": resume_text.choices[0].message.content},
             ],
             temperature=0.5
         )
-        print(completion.choices[0].message.content)
+        print(resume_code.choices[0].message.content)
+    
+
+    def generate_cv(self, listing, resume):
+        cv_text = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You're an experienced writer who specializes in assisting people with job applications."},
+                {"role": "user", "content": "I am going to provide you with my resume and a job listing, please provide me with a cover that is tailored for the job listing. Don't make anything up about me."},
+                {"role": "user", "content": resume},
+                {"role": "user", "content": listing},
+            ],
+            temperature=1
+        )
+
+        template_cv = None
+        with open("template_cv.py", 'r') as file:
+            template_cv = file.read()
+
+        cv_code = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are an intelligent assistant with a focus on processing and integrating textual information."},
+                {"role": "user", "content": "You will be provided with Python code that generates a template for a cover letter. You will also be provided text for a cover letter. Fill in the template using the provided text for the cover letter. Keep changes to the format of the document to a minimum."},
+                {"role": "user", "content": template_cv},
+                {"role": "user", "content": cv_text.choices[0].message.content},
+            ],
+            temperature=0.5
+        )
+        print(cv_code.choices[0].message.content)
 
 
         

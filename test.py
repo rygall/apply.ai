@@ -13,7 +13,8 @@ def set_paragraph_spacing(paragraph, space_before=0, space_after=0, line_spacing
     spacing.set(qn('w:line'), str(line_spacing * 240))  # 240 is the default line height unit
     p_pr.append(spacing)
 
-applicant_name = 'Ryan Gallagher'
+
+applicant_name = 'RYAN GALLAGHER'
 applicant_town_and_state = 'Media, PA'
 applicant_phone_number = '(610) 731-3822'
 applicant_personal_email_address = 'ryan.gallagher900@gmail.com'
@@ -39,37 +40,24 @@ contact_info.add_run(applicant_work_email_address)
 # Add a section for summary
 summary_heading = doc.add_heading('SUMMARY', level=1)
 set_paragraph_spacing(summary_heading, space_before=240, space_after=120)
-
-summary = (
-    "Dynamic and results-driven Mechanical Engineer with extensive experience in machine learning and AI development, "
-    "currently pursuing a Master’s degree in Computer Science with a focus on artificial intelligence and machine learning. "
-    "Proven ability to design and deploy autonomous systems and machine learning models to optimize performance and efficiency. "
-    "Skilled in MLOps practices, advanced Python programming, and cloud infrastructure management. "
-    "Seeking a role as a Senior Machine Learning Engineer to leverage technical expertise and innovation in a challenging environment."
+summary = doc.add_paragraph()
+summary.add_run(
+    "Experienced Mechanical Engineer with a focus on design, modeling, and optimization for military and industrial applications. "
+    "Proficient in AutoCAD and possess a strong background in project management, construction inspections, and coordination with multidisciplinary teams. "
+    "Seeking to leverage expertise in a Civil Engineering role to contribute to high-impact projects at Leidos."
 )
-
-summary_paragraph = doc.add_paragraph(summary)
-set_paragraph_spacing(summary_paragraph, space_before=0, space_after=240)
 
 # Add a section for skills
 skills_heading = doc.add_heading('SKILLS', level=1)
 set_paragraph_spacing(skills_heading, space_before=240, space_after=120)
-
-skills = [
-    "Languages: C, Java, Python",
-    "Libraries & Tools: NumPy, PyTorch, Pandas, Scikit-Learn, TensorFlow, Kubeflow, MLflow, TensorBoard, Jupyter Notebooks",
-    "Version Control: Git, GitHub",
-    "MLOps & DevOps: Docker, CI/CD frameworks, Kubernetes, Infrastructure-as-Code (Terraform, Ansible)",
-    "Modeling & Simulation: PIPE-FLO, MATLAB",
-    "Computer-Aided Design: AutoCAD, SolidWorks",
-    "Other Tools: AI Explainability and Monitoring tools, CloudFormation, GitLab, Nexus"
-]
-
-skills_paragraph = doc.add_paragraph()
-set_paragraph_spacing(skills_paragraph, space_before=0, space_after=60)
-skills_run = skills_paragraph.add_run()
-for skill in skills:
-    skills_run.add_text(f"{skill}\n")
+skills = doc.add_paragraph()
+skills.add_run(
+    "- Engineering Design & Software: AutoCAD, SolidWorks, PIPE-FLO\n"
+    "- Programming Languages: C, Java, Python\n"
+    "- Data Analysis Libraries: NumPy, PyTorch, Pandas, Scikit-Learn\n"
+    "- Version Control Systems: Git, GitHub\n"
+    "- Simulation Tools: MATLAB"
+)
 
 # Add a section for experience
 experience_heading = doc.add_heading('EXPERIENCE', level=1)
@@ -80,22 +68,26 @@ experience = [
         'role': 'Mechanical Engineer',
         'company': 'Leidos, Philadelphia, PA',
         'period': 'May 2020 - Present',
+        'place': '',
         'keypoints': [
-            "Designed and implemented autonomous systems for U.S. Navy and DARPA unmanned surface vessels.",
-            "Developed digital models and optimized performance of auxiliary systems using simulation.",
-            "Analyzed data to optimize engine systems and reduce operating times.",
-            "Provided engineering support for the Naval Surface Warfare Center’s DDG(X) program.",
-            "Developed machine learning models and software tools:",
-            " - Trained neural networks for predicting system performance in partially-observable environments.",
-            " - Developed GUI-based programs for engineering computations.",
-            " - Created reinforcement learning models for equipment arrangement on ships."
+            'Designed fully autonomous auxiliary systems for U.S. Navy and DARPA unmanned surface vessels.',
+            'Developed digital models of auxiliary systems to optimize performance.',
+            'Provided engineering support for the Naval Surface Warfare Center\'s DDG(X) land-based test site.',
+            'Analyzed data to support modification proposals for LPD 17 class ships, improving operational efficiency.',
+            'Developed software including feed-forward neural networks and reinforcement learning models to enhance ship design processes.'
         ]
     },
     {
         'role': 'Mechanical Engineering Intern',
         'company': 'Monroe Energy, LLC, Trainer, PA',
-        'period': 'May - August, 2016 - 2019',
-        'keypoints': []
+        'period': 'May 2016 - August 2019',
+        'place': '',
+        'keypoints': [
+            'Assisted with on-site surveys and developed detailed engineering reports.',
+            'Participated in construction inspections and coordinated with team members to resolve design issues.',
+            'Utilized AutoCAD for the preparation of construction drawings and project specifications.',
+            'Supported the preparation of project management documentation, including safety plans and risk assessments.'
+        ]
     }
 ]
 
@@ -103,7 +95,7 @@ for exp in experience:
     p = doc.add_paragraph()
     set_paragraph_spacing(p, space_before=0, space_after=60)
     p.add_run(f"{exp['role']} - {exp['company']}").bold = True
-    p.add_run(f"\n{exp['period']}")
+    p.add_run(f"\n{exp['period']} | {exp['place']}")
     for keypoint in exp['keypoints']:
         keypoint_paragraph = doc.add_paragraph(f"• {keypoint}", style='List Bullet')
         set_paragraph_spacing(keypoint_paragraph, space_before=0, space_after=0)
@@ -114,18 +106,17 @@ set_paragraph_spacing(education_heading, space_before=240, space_after=120)
 
 education = [
     {
-        'title': 'Master of Science, Computer Science (AI/ML focus)',
+        'title': 'Master of Science, Computer Science',
         'university': 'Drexel University, Philadelphia, PA',
-        'grad_date': '2021 - Present',
+        'grad_date': '2021-Present',
         'gpa': '3.93',
-        'minor': None
+        'additional_info': 'Focus: Artificial Intelligence and Machine Learning\nExpected Graduation: Spring 2025'
     },
     {
         'title': 'Bachelor of Science, Mechanical Engineering',
         'university': 'Thomas Jefferson University, Philadelphia, PA',
         'grad_date': '2018 - 2020',
-        'gpa': '3.39',
-        'minor': None
+        'gpa': '3.39'
     },
     {
         'title': 'Bachelor of Science, Physics',
@@ -146,9 +137,39 @@ for edu in education:
         p.add_run(f"\nGPA: {edu['gpa']}")
     if 'minor' in edu:
         p.add_run(f"\nMinor: {edu['minor']}")
+    if 'additional_info' in edu:
+        p.add_run(f"\n{edu['additional_info']}")
+
+# Add a section for certifications and clearances
+certifications_heading = doc.add_heading('CERTIFICATIONS AND CLEARANCES', level=1)
+set_paragraph_spacing(certifications_heading, space_before=240, space_after=120)
+certifications = doc.add_paragraph()
+certifications.add_run('[Add any relevant certifications or clearances you have here, if applicable]')
+
+# Add a section for professional strengths
+strengths_heading = doc.add_heading('PROFESSIONAL STRENGTHS', level=1)
+set_paragraph_spacing(strengths_heading, space_before=240, space_after=120)
+strengths = doc.add_paragraph()
+strengths.add_run(
+    "- Strong understanding of structural design, including foundations and industrial structural systems.\n"
+    "- Extensive experience with AutoCAD and other design software for the creation of precise engineering drawings.\n"
+    "- Proven ability to manage multiple concurrent projects, ensuring timely and successful completion.\n"
+    "- Effective communicator, capable of delivering clear and concise technical documentation and coordinating with diverse stakeholders.\n"
+    "- Knowledgeable in current building structural codes and capable of performing relevant design calculations and assessments.\n"
+    "- Eligible to obtain FAA Public Trust clearance."
+)
+
+# Add a section for additional information
+additional_info_heading = doc.add_heading('ADDITIONAL INFORMATION', level=1)
+set_paragraph_spacing(additional_info_heading, space_before=240, space_after=120)
+additional_info = doc.add_paragraph()
+additional_info.add_run(
+    "- Willing to relocate to Fort Worth, TX.\n"
+    "- Available for 25% travel as required by the position."
+)
 
 # Save the document
-output_path = 'Resume.docx'
+output_path = 'Resume_Filled.docx'
 doc.save(output_path)
 
 print(f"Document saved as {output_path}")
