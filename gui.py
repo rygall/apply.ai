@@ -100,7 +100,7 @@ class App(ctk.CTk):
         pdf_path = self.pdf_entry.get()
 
         # Convert URL Job Listing to Text
-        self.listing = self.extract_listing(url)
+        listing = self.extract_listing(url)
 
         # Convert PDF Resume Text
         input_pdf_text = self.pdf_to_text(pdf_path)
@@ -110,16 +110,13 @@ class App(ctk.CTk):
         self.output_box.delete('1.0', tk.END)
         self.output_box.insert(tk.END, output_text)
         self.output_box.configure(state='disabled')
+
         # Tokenize the prompt
         encoding = tiktoken.get_encoding("o200k_base")
-        num_tokens = len(encoding.encode(self.listing))
-        # Count the number of tokens
+        num_tokens = len(encoding.encode(listing))
         print("Job listing is " + str(num_tokens) + " tokens")
         
-        parsed_listing = self.extract_relevant_info(self.listing)
-        print("======PARSED LISTING======")
-        print(parsed_listing)
-        print("======END PARSED LISTING======")
+        parsed_listing = self.extract_relevant_info(listing)
 
         self.generate_resume(parsed_listing, input_pdf_text)
         self.generate_cv(parsed_listing, input_pdf_text)
@@ -142,11 +139,9 @@ class App(ctk.CTk):
         completion = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are an expert at parsing through data and extracting relevant information."},
-                {"role": "user", "content": "You are going to be provided a large string, within that string is information on a job listing. Extract all information for the job listing."},
+                {"role": "system", "content": "You are going to be provided a large string, within that string is information on a job listing. Extract all information for the job listing."},
                 {"role": "user", "content": listing}
-            ],
-            temperature=0.7
+            ]
         )
         return completion.choices[0].message.content
 
@@ -154,12 +149,10 @@ class App(ctk.CTk):
         resume_text = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You're an experienced writer who specializes in assisting people with job applications."},
-                {"role": "user", "content": "I am going to provide you with my resume and a job listing, please provide me with a resume that is tweaked for the job listing. Don't make anything up about me."},
+                {"role": "system", "content": "You are going to be provided with a resume and a job listing, please write a resume that is tailored for the job listing. Don't make anything up about the applicant."},
                 {"role": "user", "content": resume},
                 {"role": "user", "content": listing},
-            ],
-            temperature=1
+            ]
         )
 
         template_res = None
@@ -169,12 +162,10 @@ class App(ctk.CTk):
         resume_code = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are an intelligent assistant with a focus on processing and integrating textual information."},
-                {"role": "user", "content": "You will be provided with Python code that generates a template for a resume. You will also be provided text for a cover letter. Fill in the template using the provided text for the cover letter. Keep changes to the format of the document to a minimum."},
+                {"role": "system", "content": "You will be provided with Python code that generates a template for a resume. You will also be provided text that is for a resume. Fill in the template using the provided text for the resume. Keep changes to the format of the word document to a minimum."},
                 {"role": "user", "content": template_res},
                 {"role": "user", "content": resume_text.choices[0].message.content},
-            ],
-            temperature=0.5
+            ]
         )
         print(resume_code.choices[0].message.content)
     
@@ -183,12 +174,10 @@ class App(ctk.CTk):
         cv_text = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You're an experienced writer who specializes in assisting people with job applications."},
-                {"role": "user", "content": "I am going to provide you with my resume and a job listing, please provide me with a cover that is tailored for the job listing. Don't make anything up about me."},
+                {"role": "system", "content": "You are going to be provided with a resume and a job listing, please write a cover that is tailored for the job listing. Don't make anything up about the applicant."},
                 {"role": "user", "content": resume},
                 {"role": "user", "content": listing},
-            ],
-            temperature=1
+            ]
         )
 
         template_cv = None
@@ -198,12 +187,10 @@ class App(ctk.CTk):
         cv_code = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are an intelligent assistant with a focus on processing and integrating textual information."},
-                {"role": "user", "content": "You will be provided with Python code that generates a template for a cover letter. You will also be provided text for a cover letter. Fill in the template using the provided text for the cover letter. Keep changes to the format of the document to a minimum."},
+                {"role": "system", "content": "You will be provided with Python code that generates a template for a cover letter. You will also be provided text that is for a cover letter. Fill in the template using the provided text for the cover letter. Keep changes to the format of the word document to a minimum."},
                 {"role": "user", "content": template_cv},
                 {"role": "user", "content": cv_text.choices[0].message.content},
-            ],
-            temperature=0.5
+            ]
         )
         print(cv_code.choices[0].message.content)
 
