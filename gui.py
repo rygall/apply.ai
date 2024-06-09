@@ -21,7 +21,7 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title('Apply.ai Application')
-        self.geometry('600x700')
+        self.geometry('700x750')
 
         original_image = Image.open('logo-no-background.png')
         resized_image = original_image.resize((75, 75))
@@ -52,6 +52,24 @@ class App(ctk.CTk):
         self.process_button = ctk.CTkButton(self, text="Process", command=self.process_input)
         self.process_button.pack(pady=20)
 
+        # Progress LED Indicators
+        background_color = "#2b2b2b"  # This is an example, replace with the actual color
+        self.led_frame = ctk.CTkFrame(self)
+        self.led_frame.pack(pady=10)
+        self.leds = []
+        self.led_labels = ["Extract Listing", "Extract Resume", "Generate Cover Letter", "Generate Resume",
+                           "Files Generated"]
+        for i in range(5):
+            led_label = ctk.CTkLabel(self.led_frame, text=self.led_labels[i])
+            led_label.pack(side=tk.LEFT, padx=5)
+
+            # Create a canvas for the LED with the same background color as your GUI
+            led_canvas = tk.Canvas(self.led_frame, width=20, height=20, bg=background_color, highlightthickness=0)
+            led_canvas.pack(side=tk.LEFT, padx=5)
+
+            # Draw a circle on the canvas to represent the LED
+            led = led_canvas.create_oval(5, 5, 15, 15, fill="red", outline="black")
+            self.leds.append(led)
 
         # Input / Output Separator
         self.separator_frame = ctk.CTkFrame(self, height=2, fg_color=self.process_button.cget('fg_color'))
@@ -213,7 +231,26 @@ class App(ctk.CTk):
         except ValueError:
             return "Characters not found in the text or in wrong order."
 
+    def parse_semicolon_separated_values(input_string):
+        # Split the string by semicolon and return the list
+        return input_string.split(';')
+    #Output = [qualification 1, qualification 2, qualification 3...]
 
+    def append_number_based_on_string(input_string, number_list):
+        # Append 1 or 0 to the list based on the content of the string
+        if '1' in input_string:
+            number_list.append(1)
+        elif '0' in input_string:
+            number_list.append(0)
+        return number_list
+    #Output = [1,0,0,1,0]
+
+    def qual_percentage(number_list):
+        # Count the number of 1's in the list
+        count_of_ones = number_list.count(1)
+        # Calculate the percentage of 1's
+        percentage_of_ones = (count_of_ones / len(number_list)) * 100 if number_list else 0
+        return percentage_of_ones
         
 if __name__ == "__main__":
     app = App()
