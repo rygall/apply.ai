@@ -120,10 +120,18 @@ class App(ctk.CTk):
         num_tokens = len(encoding.encode(listing))
         print("Job listing is " + str(num_tokens) + " tokens")
         
+        # extract the relevant text for the job listing
         parsed_listing = self.extract_relevant_info(listing)
 
-        self.generate_resume(parsed_listing, input_pdf_text)
-        self.generate_cv(parsed_listing, input_pdf_text)
+        # generate resume
+        resume_text = self.generate_resume(parsed_listing, input_pdf_text)
+        resume_code = self.extract_substring(resume_text)
+        exec(resume_code, globals())
+
+        # generate cover letter
+        cv_text = self.generate_cv(parsed_listing, input_pdf_text)
+        cv_code = self.extract_substring(cv_text)
+        exec(cv_code, globals())
 
     def extract_listing(self, url):
         # initialize a new browser (in this case, we're using Chrome)
@@ -171,9 +179,7 @@ class App(ctk.CTk):
                 {"role": "user", "content": resume_text.choices[0].message.content},
             ]
         )
-        #print(resume_code.choices[0].message.content)
-        print('Resume Completed')
-
+        return resume_code.choices[0].message.content
 
     def generate_cv(self, listing, resume):
         cv_text = client.chat.completions.create(
@@ -197,9 +203,15 @@ class App(ctk.CTk):
                 {"role": "user", "content": cv_text.choices[0].message.content},
             ]
         )
-        #print(cv_code.choices[0].message.content)
-        print('Cover Letter Completed')
+        return cv_code.choices[0].message.content
 
+    def extract_substring(self, text):
+        try:
+            start_index = text.index("```python") + len("```python")
+            end_index = text.index("```", start_index)
+            return text[start_index:end_index]
+        except ValueError:
+            return "Characters not found in the text or in wrong order."
 
 
         
