@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 import tiktoken
 from pdfminer.high_level import extract_text
-
+import threading
 from openai import OpenAI
 client = OpenAI()
 
@@ -96,6 +96,10 @@ class App(ctk.CTk):
             self.pdf_entry.configure(state='disabled')
 
     def process_input(self):
+        # Create a new thread for the long-running tasks
+        threading.Thread(target=self.main_tasks).start()
+
+    def main_tasks(self):
         url = self.url_entry.get()
         pdf_path = self.pdf_entry.get()
 
@@ -167,8 +171,9 @@ class App(ctk.CTk):
                 {"role": "user", "content": resume_text.choices[0].message.content},
             ]
         )
-        print(resume_code.choices[0].message.content)
-    
+        #print(resume_code.choices[0].message.content)
+        print('Resume Completed')
+
 
     def generate_cv(self, listing, resume):
         cv_text = client.chat.completions.create(
@@ -192,7 +197,9 @@ class App(ctk.CTk):
                 {"role": "user", "content": cv_text.choices[0].message.content},
             ]
         )
-        print(cv_code.choices[0].message.content)
+        #print(cv_code.choices[0].message.content)
+        print('Cover Letter Completed')
+
 
 
         
