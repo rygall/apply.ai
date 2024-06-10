@@ -57,8 +57,8 @@ class App(ctk.CTk):
         self.led_frame = ctk.CTkFrame(self)
         self.led_frame.pack(pady=10)
         self.leds = []
-        self.led_labels = ["Extract Listing", "Extract Resume", "Generate Cover Letter", "Generate Resume",
-                           "Files Generated"]
+        self.led_labels = ["Extract Listing", "Extract Resume", "Generate Resume", "Generate Cover Letter",
+                           "Evaluate"]
         for i in range(5):
             led_label = ctk.CTkLabel(self.led_frame, text=self.led_labels[i])
             led_label.pack(side=tk.LEFT, padx=5)
@@ -114,45 +114,62 @@ class App(ctk.CTk):
             self.pdf_entry.configure(state='disabled')
 
     def process_input(self):
+        self.change_led_color(0, "red")
+        self.change_led_color(1, "red")
+        self.change_led_color(2, "red")
+        self.change_led_color(3, "red")
+        self.change_led_color(4, "red")
+
         # Create a new thread for the long-running tasks
         threading.Thread(target=self.main_tasks).start()
 
     def main_tasks(self):
         url = self.url_entry.get()
         pdf_path = self.pdf_entry.get()
-
+        self.change_led_color(0, "yellow")
         # Convert URL Job Listing to Text
         listing = self.extract_listing(url)
+        # Tokenize the prompt
+        encoding = tiktoken.get_encoding("o200k_base")
+        num_tokens = len(encoding.encode(listing))
+        print("Job listing is " + str(num_tokens) + " tokens")
+        # extract the relevant text for the job listing
+        parsed_listing = self.extract_relevant_info(listing)
+        self.change_led_color(0, "green")
 
         # Convert PDF Resume Text
+        self.change_led_color(1, "yellow")
         input_pdf_text = self.pdf_to_text(pdf_path)
+        self.change_led_color(1, "green")
 
+        #Output to reccomended skills CHANGE LATER
         output_text = f"Processed URL: {url} \n PDF: {pdf_path}"
         self.output_box.configure(state='normal')
         self.output_box.delete('1.0', tk.END)
         self.output_box.insert(tk.END, output_text)
         self.output_box.configure(state='disabled')
 
-        # Tokenize the prompt
-        encoding = tiktoken.get_encoding("o200k_base")
-        num_tokens = len(encoding.encode(listing))
-        print("Job listing is " + str(num_tokens) + " tokens")
-        
-        # extract the relevant text for the job listing
-        parsed_listing = self.extract_relevant_info(listing)
+
 
         # generate resume
+        self.change_led_color(2, "yellow")
         resume_text = self.generate_resume(parsed_listing, input_pdf_text)
         resume_code = self.extract_substring(resume_text)
         exec(resume_code, globals())
+        self.change_led_color(2, "green")
 
         # generate cover letter
+        self.change_led_color(3, "yellow")
         cv_text = self.generate_cv(parsed_listing, input_pdf_text)
         cv_code = self.extract_substring(cv_text)
         exec(cv_code, globals())
+        self.change_led_color(3, "green")
+
 
         # evaluate
+        self.change_led_color(4, "yellow")
         self.evaluation(parsed_listing, resume_text, cv_text)
+        self.change_led_color(4, "green")
 
     def pdf_to_text(self, pdf_path):
         # Extract text from the PDF file
@@ -285,6 +302,13 @@ class App(ctk.CTk):
         # Calculate the percentage of 1's
         percentage_of_ones = (count_of_ones / len(number_list)) * 100 if number_list else 0
         return percentage_of_ones
+
+    def change_led_color(self, led_index, new_color):
+        # Get the canvas that contains the LED
+        led_canvas = self.led_frame.winfo_children()[led_index * 2 + 1]
+
+        # Change the color of the LED
+        led_canvas.itemconfig(self.leds[led_index], fill=new_color)
 
 
 if __name__ == "__main__":
