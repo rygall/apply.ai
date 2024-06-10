@@ -151,6 +151,14 @@ class App(ctk.CTk):
         cv_code = self.extract_substring(cv_text)
         exec(cv_code, globals())
 
+        # evaluate
+        self.evaluation(parsed_listing, resume_text, cv_text)
+
+    def pdf_to_text(self, pdf_path):
+        # Extract text from the PDF file
+        text = extract_text(pdf_path)
+        return text
+
     def extract_listing(self, url):
         # initialize a new browser (in this case, we're using Chrome)
         browser = webdriver.Chrome()
@@ -159,11 +167,6 @@ class App(ctk.CTk):
         # get the page source and parse it with BeautifulSoup
         soup = BeautifulSoup(browser.page_source, 'html.parser')
         return soup.text
-
-    def pdf_to_text(self, pdf_path):
-        # Extract text from the PDF file
-        text = extract_text(pdf_path)
-        return text
 
     def extract_relevant_info(self, listing):
         completion = client.chat.completions.create(
@@ -192,7 +195,7 @@ class App(ctk.CTk):
         resume_code = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You will be provided with Python code that generates a template for a resume. You will also be provided text that is for a resume. Fill in the template using the provided text for the resume. Keep changes to the format of the word document to a minimum."},
+                {"role": "system", "content": "You will be provided with Python code that generates a template for a resume. You will also be provided text that is for a resume. Fill in the template using the provided text for the resume. Keep changes to the format of the word document to a minimum. Don't make information up about the applicant."},
                 {"role": "user", "content": template_res},
                 {"role": "user", "content": resume_text.choices[0].message.content},
             ]
@@ -216,7 +219,7 @@ class App(ctk.CTk):
         cv_code = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You will be provided with Python code that generates a template for a cover letter. You will also be provided text that is for a cover letter. Fill in the template using the provided text for the cover letter. Keep changes to the format of the word document to a minimum."},
+                {"role": "system", "content": "You will be provided with Python code that generates a template for a cover letter. You will also be provided text that is for a cover letter. Fill in the template using the provided text for the cover letter. Keep changes to the format of the word document to a minimum. Don't make information up about the applicant."},
                 {"role": "user", "content": template_cv},
                 {"role": "user", "content": cv_text.choices[0].message.content},
             ]
@@ -230,28 +233,86 @@ class App(ctk.CTk):
             return text[start_index:end_index]
         except ValueError:
             return "Characters not found in the text or in wrong order."
+        
+    def evaluation(self, job_listing, resume, cv):
+        # gather qualifications list
+        qualificaiton_string = self.generate_qualifications_string(job_listing)
+        qualification_list = self.parse_qualifications_string(qualificaiton_string)
 
-    def parse_semicolon_separated_values(input_string):
-        # Split the string by semicolon and return the list
+        # generate scores for resume and cv
+        res_score = self.evaluate_resume(qualification_list, resume)
+        print("Resume Score:", res_score)
+        cv_score = self.evaluate_cv(qualification_list, cv)
+        print("Cover Letter Score:", cv_score)
+
+    def generate_qualifications_string(self, listing):
+        qual_list = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You will be provided with a job listing. Please extract the jobs qualifications, then format them into a list. Your response should be one single string, where each requirement or qualification is separated by a semicolon."},
+                {"role": "user", "content": listing},
+            ]
+        )
+        return qual_list.choices[0].message.content
+
+    def parse_qualifications_string(self, input_string):
         return input_string.split(';')
-    #Output = [qualification 1, qualification 2, qualification 3...]
 
-    def append_number_based_on_string(input_string, number_list):
-        # Append 1 or 0 to the list based on the content of the string
-        if '1' in input_string:
-            number_list.append(1)
-        elif '0' in input_string:
-            number_list.append(0)
-        return number_list
-    #Output = [1,0,0,1,0]
+    def evaluate_resume(self, qualification_list, resume):
+        results = []
+        for qualification in qualification_list:
+            print("Qualification:", qualification)
+            satisifed = self.determine_satisfied_resume(qualification, resume)
+            print("Satisfied:", satisifed)
+            results.append(int(satisifed))
+        print("Results List:", results)
+        resume_score = self.satisfied_percentage(results)
+        return resume_score
+    
+    def determine_satisfied_resume(self, qualification, resume):
+        qual_list = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You will be provided with a specific qualificaiton for a job listing and also a resume that will be submitted in an application to that job listing. Please respond the number 1 if the qualification is satisfied, or the number 0 if it is not satisfied. Don't respond with anything but 1 or 0."},
+                {"role": "user", "content": qualification},
+                {"role": "user", "content": resume}
+            ],
+            temperature=0.3
+        )
+        return qual_list.choices[0].message.content
 
-    def qual_percentage(number_list):
+    def evaluate_cv(self, qualification_list, cv):
+        results = []
+        for qualification in qualification_list:
+            print("Qualification:", qualification)
+            satisifed = self.determine_satisfied_resume(qualification, cv)
+            print("Satisfied:", satisifed)
+            results.append(int(satisifed))
+        print("Results List:", results)
+        resume_score = self.satisfied_percentage(results)
+        return resume_score
+    
+    def determine_satisfied_cv(self, qualification_list, cv):
+        qual_list = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You will be provided with a specific qualificaiton for a job and also a cover letter that will be submitted in an application to that job listing. Please respond the number 1 if the qualification is satisfied, or the number 0 if it is not satisfied. Don't respond with anything but 1 or 0."},
+                {"role": "user", "content": qualification_list},
+                {"role": "user", "content": cv},
+            ],
+            temperature=0.3
+        )
+        return qual_list.choices[0].message.content
+
+    def satisfied_percentage(self, number_list):
         # Count the number of 1's in the list
         count_of_ones = number_list.count(1)
         # Calculate the percentage of 1's
         percentage_of_ones = (count_of_ones / len(number_list)) * 100 if number_list else 0
-        return percentage_of_ones
-        
+        return percentage_of_ones    
+
+
+
 if __name__ == "__main__":
     app = App()
     app.mainloop()
