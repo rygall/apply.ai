@@ -51,6 +51,10 @@ def create_cover_letter():
     closing_run.font.size = Pt(12)
 
     # Save the document
-    doc.save("cover_letter_template.docx")
+    applicant_first = "FILL IN APPLICANT FIRST NAME HERE"
+    applicant_last = "FILL IN APPLICANT LAST NAME HERE"
+    document_path = applicant_first + "_" + applicant_last + "_CV.docx"
+    doc.save(document_path)
+    print(f"Document saved as {document_path}")
 
 create_cover_letter()

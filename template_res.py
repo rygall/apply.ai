@@ -98,7 +98,8 @@ for skill in skills:
     skills_run.add_text(f"{skill['area']}: {skill['description']}  |  ")
 
 # Save the document
-output_path = 'Resume.docx'
-doc.save(output_path)
-
-print(f"Document saved as {output_path}")
+applicant_first = "FILL IN APPLICANT FIRST NAME HERE"
+applicant_last = "FILL IN APPLICANT LAST NAME HERE"
+document_path = applicant_first + "_" + applicant_last + "_Resume.docx"
+doc.save(document_path)
+print(f"Document saved as {document_path}")

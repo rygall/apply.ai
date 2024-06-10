@@ -260,7 +260,7 @@ class App(ctk.CTk):
         results = []
         for qualification in qualification_list:
             print("Qualification:", qualification)
-            satisifed = self.determine_satisfied_resume(qualification, resume)
+            satisifed = self.determine_satisfied(qualification, resume)
             print("Satisfied:", satisifed)
             results.append(int(satisifed))
         print("Results List:", results)
