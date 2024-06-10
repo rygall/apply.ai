@@ -239,11 +239,9 @@ class App(ctk.CTk):
         qualificaiton_string = self.generate_qualifications_string(job_listing)
         qualification_list = self.parse_qualifications_string(qualificaiton_string)
 
-        # generate scores for resume and cv
+        # generate applicant match score
         res_score = self.evaluate_resume(qualification_list, resume)
-        print("Resume Score:", res_score)
-        cv_score = self.evaluate_cv(qualification_list, cv)
-        print("Cover Letter Score:", cv_score)
+        print("Generated Applicant Match Score:", res_score, "%")
 
     def generate_qualifications_string(self, listing):
         qual_list = client.chat.completions.create(
@@ -269,7 +267,7 @@ class App(ctk.CTk):
         resume_score = self.satisfied_percentage(results)
         return resume_score
     
-    def determine_satisfied_resume(self, qualification, resume):
+    def determine_satisfied(self, qualification, resume):
         qual_list = client.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -281,36 +279,12 @@ class App(ctk.CTk):
         )
         return qual_list.choices[0].message.content
 
-    def evaluate_cv(self, qualification_list, cv):
-        results = []
-        for qualification in qualification_list:
-            print("Qualification:", qualification)
-            satisifed = self.determine_satisfied_resume(qualification, cv)
-            print("Satisfied:", satisifed)
-            results.append(int(satisifed))
-        print("Results List:", results)
-        resume_score = self.satisfied_percentage(results)
-        return resume_score
-    
-    def determine_satisfied_cv(self, qualification_list, cv):
-        qual_list = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You will be provided with a specific qualificaiton for a job and also a cover letter that will be submitted in an application to that job listing. Please respond the number 1 if the qualification is satisfied, or the number 0 if it is not satisfied. Don't respond with anything but 1 or 0."},
-                {"role": "user", "content": qualification_list},
-                {"role": "user", "content": cv},
-            ],
-            temperature=0.3
-        )
-        return qual_list.choices[0].message.content
-
     def satisfied_percentage(self, number_list):
         # Count the number of 1's in the list
         count_of_ones = number_list.count(1)
         # Calculate the percentage of 1's
         percentage_of_ones = (count_of_ones / len(number_list)) * 100 if number_list else 0
-        return percentage_of_ones    
-
+        return percentage_of_ones
 
 
 if __name__ == "__main__":
