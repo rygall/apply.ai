@@ -1,0 +1,8 @@
+customtkinter
+pillow
+beautifulsoup4
+selenium
+tiktoken
+pdfminer
+pdfminer.six
+openai

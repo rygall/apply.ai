@@ -95,8 +95,6 @@ class App(ctk.CTk):
         self.test_label = ctk.CTkLabel(self, text="Testing Results:")
         self.test_label.pack(pady=10)
 
-
-
     def load_pdf(self):
         file_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf")])
         if file_path:
@@ -134,10 +132,6 @@ class App(ctk.CTk):
         input_pdf_text = self.pdf_to_text(pdf_path)
         self.change_led_color(1, "green")
 
-
-
-
-
         # generate resume
         self.change_led_color(2, "yellow")
         resume_text = self.generate_resume(parsed_listing, input_pdf_text)
@@ -151,7 +145,6 @@ class App(ctk.CTk):
         cv_code = self.extract_substring(cv_text)
         exec(cv_code, globals())
         self.change_led_color(3, "green")
-
 
         # evaluate
         self.change_led_color(4, "yellow")
