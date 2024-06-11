@@ -21,7 +21,7 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title('Apply.ai Application')
-        self.geometry('700x750')
+        self.geometry('700x800')
 
         original_image = Image.open('logo-no-background.png')
         resized_image = original_image.resize((75, 75))
@@ -76,34 +76,26 @@ class App(ctk.CTk):
         self.separator_frame.pack(fill='x', padx=50)
 
         # Output Text Box
-        self.output_label = ctk.CTkLabel(self, text="Skill Recommendations:")
+        self.output_label = ctk.CTkLabel(self, text="Skill Recommendations")
         self.output_label.pack(pady=10)
         self.output_box = ctk.CTkTextbox(self, height=100, width=400, state='disabled')
         self.output_box.pack(pady=10)
 
+        # Qualifications Met Percentage
+        self.qual_percentage_label = ctk.CTkLabel(self, text="Qualifications Met")
+        self.qual_percentage_label.pack(padx=10)
+        self.qual_percentage_box = ctk.CTkTextbox(self, height=10, width=100, state='disabled')
+        self.qual_percentage_box.pack(padx=10, pady=10)
+
         # Output / Test Separator
         self.separator_frame = ctk.CTkFrame(self, height=2, fg_color=self.process_button.cget('fg_color'))
-        self.separator_frame.pack(fill='x', padx=50)
+        self.separator_frame.pack(fill='x', padx=70)
 
         # Testing Output
         self.test_label = ctk.CTkLabel(self, text="Testing Results:")
         self.test_label.pack(pady=10)
 
-        # Scores Frame
-        self.scores_frame = ctk.CTkFrame(self)
-        self.scores_frame.pack(pady=10)
 
-        # Original Resume Score Text Box
-        self.original_score_label = ctk.CTkLabel(self.scores_frame, text="Original Resume Score:")
-        self.original_score_label.pack(side=tk.LEFT, padx=10)
-        self.original_score_box = ctk.CTkTextbox(self.scores_frame, height=10, width=50, state='disabled')
-        self.original_score_box.pack(side=tk.LEFT, padx=10)
-
-        # Improved Resume Score Text Box
-        self.improved_score_label = ctk.CTkLabel(self.scores_frame, text="Apply.ai Resume Score:")
-        self.improved_score_label.pack(side=tk.LEFT, padx=10)
-        self.improved_score_box = ctk.CTkTextbox(self.scores_frame, height=10, width=50, state='disabled')
-        self.improved_score_box.pack(side=tk.LEFT, padx=10)
 
     def load_pdf(self):
         file_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf")])
@@ -142,12 +134,7 @@ class App(ctk.CTk):
         input_pdf_text = self.pdf_to_text(pdf_path)
         self.change_led_color(1, "green")
 
-        #Output to reccomended skills CHANGE LATER
-        output_text = f"Processed URL: {url} \n PDF: {pdf_path}"
-        self.output_box.configure(state='normal')
-        self.output_box.delete('1.0', tk.END)
-        self.output_box.insert(tk.END, output_text)
-        self.output_box.configure(state='disabled')
+
 
 
 
@@ -257,7 +244,21 @@ class App(ctk.CTk):
         qualification_list = self.parse_qualifications_string(qualificaiton_string)
 
         # generate applicant match score
-        res_score = self.evaluate_resume(qualification_list, resume)
+        res_score, results_list = self.evaluate_resume(qualification_list, resume)
+
+        self.output_box.configure(state='normal')
+        self.output_box.delete('1.0', tk.END)
+        for i in range(len(results_list)):
+            if results_list[i] == 0:
+                output_text = qualification_list[i] + "\n"
+                self.output_box.insert(tk.END, output_text)
+        self.output_box.configure(state='disabled')
+
+        self.qual_percentage_box.configure(state='normal')  # Change state to 'normal'
+        self.qual_percentage_box.delete(1.0, 'end')  # Clear the box
+        self.qual_percentage_box.insert('end', str(round(res_score))+"%")  # Insert new data
+        self.qual_percentage_box.configure(state='disabled')
+
         print("Generated Applicant Match Score:", res_score, "%")
 
     def generate_qualifications_string(self, listing):
@@ -282,7 +283,7 @@ class App(ctk.CTk):
             results.append(int(satisifed))
         print("Results List:", results)
         resume_score = self.satisfied_percentage(results)
-        return resume_score
+        return resume_score, results
     
     def determine_satisfied(self, qualification, resume):
         qual_list = client.chat.completions.create(
