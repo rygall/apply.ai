@@ -23,7 +23,7 @@ class App(ctk.CTk):
         self.title('Apply.ai Application')
         self.geometry('700x800')
 
-        original_image = Image.open('logo-no-background.png')
+        original_image = Image.open('utils\\logo-no-background.png')
         resized_image = original_image.resize((75, 75))
         self.image = ImageTk.PhotoImage(resized_image)
 
@@ -114,21 +114,12 @@ class App(ctk.CTk):
         threading.Thread(target=self.main_tasks).start()
 
     def main_tasks(self):
-        url = self.url_entry.get()
-        pdf_path = self.pdf_entry.get()
-        self.change_led_color(0, "yellow")
-        # Convert URL Job Listing to Text
-        listing = self.extract_listing(url)
-        # Tokenize the prompt
-        encoding = tiktoken.get_encoding("o200k_base")
-        num_tokens = len(encoding.encode(listing))
-        print("Job listing is " + str(num_tokens) + " tokens")
-        # extract the relevant text for the job listing
-        parsed_listing = self.extract_relevant_info(listing)
-        self.change_led_color(0, "green")
+        # extract job listing and convert to concise text
+        parsed_listing = self.extract_job_listing()
 
-        # Convert PDF Resume Text
+        # extract text from resume pdf
         self.change_led_color(1, "yellow")
+        pdf_path = self.pdf_entry.get()
         input_pdf_text = self.pdf_to_text(pdf_path)
         self.change_led_color(1, "green")
 
@@ -136,13 +127,39 @@ class App(ctk.CTk):
         self.change_led_color(2, "yellow")
         resume_text = self.generate_resume(parsed_listing, input_pdf_text)
         resume_code = self.extract_substring(resume_text)
-        exec(resume_code, globals())
+        print(parsed_listing)
+        print(resume_text)
+        print(resume_code)
+        max_retries = 5  # Set a limit to avoid infinite loops
+        attempts = 0
+        while attempts < max_retries:
+            try:
+                exec(resume_code, globals())
+                print("Code executed successfully.")
+                break
+            except Exception as e:
+                attempts += 1
+                print(f"Attempt {attempts} failed with error: {e}")
+        if attempts == max_retries:
+            print("Reached the maximum number of retries. Code execution failed.")
         self.change_led_color(2, "green")
 
         # generate cover letter
         self.change_led_color(3, "yellow")
         cv_text = self.generate_cv(parsed_listing, input_pdf_text)
         cv_code = self.extract_substring(cv_text)
+        attempts = 0
+        while attempts < max_retries:
+            try:
+                exec(cv_code, globals())
+                print("CV code executed successfully.")
+                break
+            except Exception as e:
+                attempts += 1
+                print(f"CV code attempt {attempts} failed with error: {e}")
+
+        if attempts == max_retries:
+            print("Reached the maximum number of retries for CV code. Execution failed.")
         exec(cv_code, globals())
         self.change_led_color(3, "green")
 
@@ -151,6 +168,41 @@ class App(ctk.CTk):
         self.evaluation(parsed_listing, resume_text, cv_text)
         self.change_led_color(4, "green")
 
+    def extract_job_listing(self):
+        # extract the job listing text from the website
+        self.change_led_color(0, "yellow")
+        max_attempts = 5
+        attempt = 0
+        listing = None
+        success = False
+        url = self.url_entry.get()
+        while not success and attempt < max_attempts:
+            listing, num_tokens = self.extract_and_count_tokens(url)
+            attempt += 1
+            if num_tokens > 10:
+                success = True
+        if success:
+            # Code to run after a successful extraction
+            print("Successfully extracted the listing with more than 10 tokens.")
+        else:
+            # Code to run after reaching the maximum number of attempts
+            print("Failed to extract a listing with more than 10 tokens after max attempts.")
+
+        # extract the relevant text for the job listing
+        parsed_listing = self.extract_relevant_info(listing)
+        self.change_led_color(0, "green")
+        return parsed_listing
+    
+    def extract_and_count_tokens(self, url):
+        # Convert URL job Listing to Text
+        listing = self.extract_listing(url)
+        
+        # Tokenize the job listing text
+        encoding = tiktoken.get_encoding("o200k_base")
+        num_tokens = len(encoding.encode(listing))
+        
+        return listing, num_tokens
+    
     def pdf_to_text(self, pdf_path):
         # Extract text from the PDF file
         text = extract_text(pdf_path)
@@ -186,7 +238,7 @@ class App(ctk.CTk):
         )
 
         template_res = None
-        with open("template_res.py", 'r') as file:
+        with open("utils\\template_res.py", 'r') as file:
             template_res = file.read()
 
         resume_code = client.chat.completions.create(
@@ -210,7 +262,7 @@ class App(ctk.CTk):
         )
 
         template_cv = None
-        with open("template_cv.py", 'r') as file:
+        with open("utils\\template_cv.py", 'r') as file:
             template_cv = file.read()
 
         cv_code = client.chat.completions.create(
@@ -229,7 +281,7 @@ class App(ctk.CTk):
             end_index = text.index("```", start_index)
             return text[start_index:end_index]
         except ValueError:
-            return "Characters not found in the text or in wrong order."
+            return text
         
     def evaluation(self, job_listing, resume, cv):
         # gather qualifications list

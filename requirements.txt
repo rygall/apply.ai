@@ -6,3 +6,4 @@ tiktoken
 pdfminer
 pdfminer.six
 openai
+python-docx

@@ -15,6 +15,5 @@ To run the program, enter the following command:
 
 Results are saved in the _**results**_ folder.
 
-
 # Examples
-There are examples of videos that have been colorized in the _**result**_ folder.
+There are examples of generated resumes and cover letters in the _**result**_ folder.
