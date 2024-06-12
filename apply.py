@@ -192,7 +192,7 @@ class App(ctk.CTk):
         parsed_listing = self.extract_relevant_info(listing)
         self.change_led_color(0, "green")
         return parsed_listing
-    
+ 
     def extract_and_count_tokens(self, url):
         # Convert URL job Listing to Text
         listing = self.extract_listing(url)
@@ -202,7 +202,7 @@ class App(ctk.CTk):
         num_tokens = len(encoding.encode(listing))
         
         return listing, num_tokens
-    
+
     def pdf_to_text(self, pdf_path):
         # Extract text from the PDF file
         text = extract_text(pdf_path)
@@ -282,7 +282,7 @@ class App(ctk.CTk):
             return text[start_index:end_index]
         except ValueError:
             return text
-        
+  
     def evaluation(self, job_listing, resume, cv):
         # gather qualifications list
         qualificaiton_string = self.generate_qualifications_string(job_listing)
@@ -329,7 +329,7 @@ class App(ctk.CTk):
         print("Results List:", results)
         resume_score = self.satisfied_percentage(results)
         return resume_score, results
-    
+
     def determine_satisfied(self, qualification, resume):
         qual_list = client.chat.completions.create(
             model="gpt-4o",
@@ -348,6 +348,23 @@ class App(ctk.CTk):
         # Calculate the percentage of 1's
         percentage_of_ones = (count_of_ones / len(number_list)) * 100 if number_list else 0
         return percentage_of_ones
+
+    def score_resume(self, listing, resume):
+        rubric = self.pdf_to_text("utils\\Resume-Rubric.pdf")
+        qual_list = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You will be provided with a job listing, resume tailored for that job listing, and a rubric that you will use to grade the resume. Please respond with "},
+                {"role": "user", "content": listing},
+                {"role": "user", "content": resume},
+                {"role": "user", "content": rubric}
+            ],
+            temperature=0.5
+        )
+        print(qual_list.choices[0].message.content)
+
+    def score_cv(self, listing, cv):
+        pass
 
     def change_led_color(self, led_index, new_color):
         # Get the canvas that contains the LED
