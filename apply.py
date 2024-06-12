@@ -21,7 +21,7 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title('Apply.ai Application')
-        self.geometry('700x800')
+        self.geometry('700x1000')
 
         original_image = Image.open('utils\\logo-no-background.png')
         resized_image = original_image.resize((75, 75))
@@ -94,6 +94,25 @@ class App(ctk.CTk):
         # Testing Output
         self.test_label = ctk.CTkLabel(self, text="Testing Results:")
         self.test_label.pack(pady=10)
+
+        # Add 5 Text Boxes
+        self.test_boxes = []
+        self.row_labels = ["Original", "Apply.ai Generated"]
+        self.test_labels = [["Test Box 1", "Test Box 2", "Test Box 3", "Test Box 4","Test Box 5"], ["Test Box 6", "Test Box 7", "Test Box 8", "Test Box 9", "Test Box 10"]]
+        for row_label, row_test_labels in zip(self.row_labels, self.test_labels):
+            row_label_widget = ctk.CTkLabel(self, text=row_label)
+            row_label_widget.pack(anchor='center')
+            row_frame = ctk.CTkFrame(self)
+            row_frame.pack(anchor='center', pady=10)
+            for label in row_test_labels:
+                box_frame = ctk.CTkFrame(row_frame)
+                box_frame.pack(side=tk.LEFT, padx=10)
+                test_label = ctk.CTkLabel(box_frame, text=label)
+                test_label.pack()
+                test_box = ctk.CTkTextbox(box_frame, height=10, width=100, state='disabled')
+                test_box.pack()
+                self.test_boxes.append(test_box)
+
 
     def load_pdf(self):
         file_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf")])
@@ -372,6 +391,19 @@ class App(ctk.CTk):
 
         # Change the color of the LED
         led_canvas.itemconfig(self.leds[led_index], fill=new_color)
+
+    def update_test_box(self, box_index, value):
+        box = self.test_boxes[box_index]
+        box.configure(state='normal')
+        box.delete(1.0, tk.END)
+        box.insert(tk.END, str(value))
+        if 0 <= value < 3:
+            box.configure(bg='red')
+        elif 3 <= value < 7:
+            box.configure(bg='yellow')
+        elif 7 <= value <= 10:
+            box.configure(bg='green')
+        box.configure(state='disabled')
 
 
 if __name__ == "__main__":
