@@ -146,9 +146,6 @@ class App(ctk.CTk):
         self.change_led_color(2, "yellow")
         resume_text = self.generate_resume(parsed_listing, input_pdf_text)
         resume_code = self.extract_substring(resume_text)
-        print(parsed_listing)
-        print(resume_text)
-        print(resume_code)
         max_retries = 5  # Set a limit to avoid infinite loops
         attempts = 0
         while attempts < max_retries:
@@ -184,7 +181,7 @@ class App(ctk.CTk):
 
         # evaluate
         self.change_led_color(4, "yellow")
-        self.evaluation(parsed_listing, resume_text, cv_text)
+        self.evaluation(parsed_listing, input_pdf_text, resume_text, cv_text)
         self.change_led_color(4, "green")
 
     def extract_job_listing(self):
@@ -302,13 +299,13 @@ class App(ctk.CTk):
         except ValueError:
             return text
   
-    def evaluation(self, job_listing, resume, cv):
+    def evaluation(self, job_listing, old_resume, new_resume, cv):
         # gather qualifications list
         qualificaiton_string = self.generate_qualifications_string(job_listing)
         qualification_list = self.parse_qualifications_string(qualificaiton_string)
 
         # generate applicant match score
-        res_score, results_list = self.evaluate_resume(qualification_list, resume)
+        res_score, results_list = self.evaluate_resume(qualification_list, new_resume)
 
         self.output_box.configure(state='normal')
         self.output_box.delete('1.0', tk.END)
@@ -324,6 +321,9 @@ class App(ctk.CTk):
         self.qual_percentage_box.configure(state='disabled')
 
         print("Generated Applicant Match Score:", res_score, "%")
+
+        self.score_old_resume(listing=job_listing, old_resume=old_resume)
+        self.score_new_resume(listing=job_listing, new_resume=new_resume)
 
     def generate_qualifications_string(self, listing):
         qual_list = client.chat.completions.create(
@@ -368,22 +368,37 @@ class App(ctk.CTk):
         percentage_of_ones = (count_of_ones / len(number_list)) * 100 if number_list else 0
         return percentage_of_ones
 
-    def score_resume(self, listing, resume):
-        rubric = self.pdf_to_text("utils\\Resume-Rubric.pdf")
+    def score_old_resume(self, listing, old_resume):
+        rubric = None
+        with open("utils\\rubric.txt", 'r') as file:
+            rubric = file.read()
         qual_list = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You will be provided with a job listing, resume tailored for that job listing, and a rubric that you will use to grade the resume. Please respond with "},
+                {"role": "system", "content": "You are a college professor that has given students an assignment to tailor their resumes to a specific job listing. You will be provided with the job listing, a students resume tailored for that job listing, and a rubric that you will use to grade the resume. Please grade the resume based on the rubric and output only the final score out of 100."},
                 {"role": "user", "content": listing},
-                {"role": "user", "content": resume},
+                {"role": "user", "content": old_resume},
                 {"role": "user", "content": rubric}
             ],
             temperature=0.5
         )
-        print(qual_list.choices[0].message.content)
+        print("Original Resume Score", qual_list.choices[0].message.content)
 
-    def score_cv(self, listing, cv):
-        pass
+    def score_new_resume(self, listing, new_resume):
+        rubric = None
+        with open("utils\\rubric.txt", 'r') as file:
+            rubric = file.read()
+        qual_list = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a college professor that has given students an assignment to tailor their resumes to a specific job listing. You will be provided with the job listing, a students resume tailored for that job listing, and a rubric that you will use to grade the resume. Please grade the resume based on the rubric and output only the final score out of 100."},
+                {"role": "user", "content": listing},
+                {"role": "user", "content": new_resume},
+                {"role": "user", "content": rubric}
+            ],
+            temperature=0.5
+        )
+        print("Generated Resume Score", qual_list.choices[0].message.content)
 
     def change_led_color(self, led_index, new_color):
         # Get the canvas that contains the LED
