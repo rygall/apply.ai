@@ -98,7 +98,7 @@ class App(ctk.CTk):
         # Add 5 Text Boxes
         self.test_boxes = []
         self.row_labels = ["Original", "Apply.ai Generated"]
-        self.test_labels = [["Test Box 1", "Test Box 2", "Test Box 3", "Test Box 4","Test Box 5"], ["Test Box 6", "Test Box 7", "Test Box 8", "Test Box 9", "Test Box 10"]]
+        self.test_labels = [["Impact", "Repetition", "Weak Action Verbs", "Accomplishment Verbs","Final Score"], ["Impact", "Repetition", "Weak Action Verbs", "Accomplishment Verbs","Final Score"]]
         for row_label, row_test_labels in zip(self.row_labels, self.test_labels):
             row_label_widget = ctk.CTkLabel(self, text=row_label)
             row_label_widget.pack(anchor='center')
@@ -322,8 +322,22 @@ class App(ctk.CTk):
 
         print("Generated Applicant Match Score:", res_score, "%")
 
-        self.score_old_resume(listing=job_listing, old_resume=old_resume)
-        self.score_new_resume(listing=job_listing, new_resume=new_resume)
+        old_scores = self.score_old_resume(listing=job_listing, old_resume=old_resume)
+        new_scores = self.score_new_resume(listing=job_listing, new_resume=new_resume)
+        old_scores_list = self.parse_qualifications_string(old_scores)
+        new_scores_list = self.parse_qualifications_string(new_scores)
+        old_score_total = 0
+        for index, score in enumerate (old_scores_list):
+            self.update_test_box(index, int(score))
+            old_score_total += int(score)
+        self.update_test_box(4, int(old_score_total))
+
+        new_score_total = 0
+        for index, score in enumerate (new_scores_list):
+            self.update_test_box(index+5, int(score))
+            new_score_total += int(score)
+        self.update_test_box(9, int(new_score_total))
+
 
     def generate_qualifications_string(self, listing):
         qual_list = client.chat.completions.create(
@@ -375,14 +389,14 @@ class App(ctk.CTk):
         qual_list = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a college professor that has given students an assignment to tailor their resumes to a specific job listing. You will be provided with the job listing, a students resume tailored for that job listing, and a rubric that you will use to grade the resume. Please grade the resume based on the rubric. Output the grade of each section out of 5 points. Seperate each individual score with a semicolon. Output nothing but the scores seperated by the semi colon."},
+                {"role": "system", "content": "You are a college professor that has given students an assignment to tailor their resumes to a specific job listing. You will be provided with the job listing, a students resume tailored for that job listing, and a rubric that you will use to grade the resume. Please grade the resume based on the rubric. Output the grade of each section out of 25 points. Seperate each individual score with a semicolon. Output nothing but the scores seperated by the semi colon."},
                 {"role": "user", "content": listing},
                 {"role": "user", "content": old_resume},
                 {"role": "user", "content": rubric}
             ],
             temperature=0.3
         )
-        print("Original Resume Score", qual_list.choices[0].message.content)
+        return qual_list.choices[0].message.content
 
     def score_new_resume(self, listing, new_resume):
         rubric = None
@@ -391,14 +405,14 @@ class App(ctk.CTk):
         qual_list = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a college professor that has given students an assignment to tailor their resumes to a specific job listing. You will be provided with the job listing, a students resume tailored for that job listing, and a rubric that you will use to grade the resume. Please grade the resume based on the rubric. Output the grade of each section out of 5 points. Seperate each individual score with a semicolon. Output nothing but the scores seperated by the semi colon."},
+                {"role": "system", "content": "You are a college professor that has given students an assignment to tailor their resumes to a specific job listing. You will be provided with the job listing, a students resume tailored for that job listing, and a rubric that you will use to grade the resume. Please grade the resume based on the rubric. Output the grade of each section out of 25 points. Seperate each individual score with a semicolon. Output nothing but the scores seperated by the semi colon."},
                 {"role": "user", "content": listing},
                 {"role": "user", "content": new_resume},
                 {"role": "user", "content": rubric}
             ],
             temperature=0.3
         )
-        print("Generated Resume Score", qual_list.choices[0].message.content)
+        return qual_list.choices[0].message.content
 
     def change_led_color(self, led_index, new_color):
         # Get the canvas that contains the LED
@@ -412,12 +426,12 @@ class App(ctk.CTk):
         box.configure(state='normal')
         box.delete(1.0, tk.END)
         box.insert(tk.END, str(value))
-        if 0 <= value < 3:
-            box.configure(bg='red')
-        elif 3 <= value < 7:
-            box.configure(bg='yellow')
-        elif 7 <= value <= 10:
-            box.configure(bg='green')
+       # if 0 <= value < 8.5:
+       #     box.configure(background='red')
+       # elif 8.5 <= value < 17.5:
+       #     box.configure(background='yellow')
+       # elif 18 <= value <= 26:
+       #     box.configure(background='green')
         box.configure(state='disabled')
 
 
