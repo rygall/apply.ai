@@ -375,12 +375,12 @@ class App(ctk.CTk):
         qual_list = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a college professor that has given students an assignment to tailor their resumes to a specific job listing. You will be provided with the job listing, a students resume tailored for that job listing, and a rubric that you will use to grade the resume. Please grade the resume based on the rubric. Output the grade of each section out of 25 points. Seperate each individual score with a semicolon. Output nothing but the scores seperated by the semi colon."},
+                {"role": "system", "content": "You are a college professor that has given students an assignment to tailor their resumes to a specific job listing. You will be provided with the job listing, a students resume tailored for that job listing, and a rubric that you will use to grade the resume. Please grade the resume based on the rubric. Output the grade of each section out of 5 points. Seperate each individual score with a semicolon. Output nothing but the scores seperated by the semi colon."},
                 {"role": "user", "content": listing},
                 {"role": "user", "content": old_resume},
                 {"role": "user", "content": rubric}
             ],
-            temperature=0.5
+            temperature=0.3
         )
         print("Original Resume Score", qual_list.choices[0].message.content)
 
@@ -391,12 +391,12 @@ class App(ctk.CTk):
         qual_list = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a college professor that has given students an assignment to tailor their resumes to a specific job listing. You will be provided with the job listing, a students resume tailored for that job listing, and a rubric that you will use to grade the resume. Please grade the resume based on the rubric. Output the grade of each section out of 25 points. Seperate each individual score with a semicolon. Output nothing but the scores seperated by the semi colon."},
+                {"role": "system", "content": "You are a college professor that has given students an assignment to tailor their resumes to a specific job listing. You will be provided with the job listing, a students resume tailored for that job listing, and a rubric that you will use to grade the resume. Please grade the resume based on the rubric. Output the grade of each section out of 5 points. Seperate each individual score with a semicolon. Output nothing but the scores seperated by the semi colon."},
                 {"role": "user", "content": listing},
                 {"role": "user", "content": new_resume},
                 {"role": "user", "content": rubric}
             ],
-            temperature=0.5
+            temperature=0.3
         )
         print("Generated Resume Score", qual_list.choices[0].message.content)
 
