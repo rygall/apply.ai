@@ -138,6 +138,7 @@ class App(ctk.CTk):
     def main_tasks(self):
         # extract job listing and convert to concise text
         parsed_listing = self.extract_job_listing()
+        print(parsed_listing)
 
         # extract text from resume pdf
         self.change_led_color(1, "yellow")
@@ -147,12 +148,14 @@ class App(ctk.CTk):
 
         # generate resume
         self.change_led_color(2, "yellow")
-        resume_text = self.generate_resume(parsed_listing, input_pdf_text)
-        resume_code = self.extract_substring(resume_text)
+        resume_text = None
+        resume_code = None
         max_retries = 5  # Set a limit to avoid infinite loops
         attempts = 0
         while attempts < max_retries:
             try:
+                resume_text = self.generate_resume(parsed_listing, input_pdf_text)
+                resume_code = self.extract_substring(resume_text)
                 exec(resume_code, globals())
                 print("Code executed successfully.")
                 break
@@ -165,21 +168,21 @@ class App(ctk.CTk):
 
         # generate cover letter
         self.change_led_color(3, "yellow")
-        cv_text = self.generate_cv(parsed_listing, input_pdf_text)
-        cv_code = self.extract_substring(cv_text)
+        cv_text = None
+        cv_code = None
         attempts = 0
         while attempts < max_retries:
             try:
+                cv_text = self.generate_cv(parsed_listing, input_pdf_text)
+                cv_code = self.extract_substring(cv_text)
                 exec(cv_code, globals())
                 print("CV code executed successfully.")
                 break
             except Exception as e:
                 attempts += 1
                 print(f"CV code attempt {attempts} failed with error: {e}")
-
         if attempts == max_retries:
             print("Reached the maximum number of retries for CV code. Execution failed.")
-        exec(cv_code, globals())
         self.change_led_color(3, "green")
 
         # evaluate

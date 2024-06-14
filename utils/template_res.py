@@ -100,6 +100,6 @@ for skill in skills:
 # Save the document
 applicant_first = "FILL IN APPLICANT FIRST NAME HERE"
 applicant_last = "FILL IN APPLICANT LAST NAME HERE"
-document_path = applicant_first + "_" + applicant_last + "_Resume.docx"
+document_path = "results\\" + applicant_first + "_" + applicant_last + "_Resume.docx"
 doc.save(document_path)
 print(f"Document saved as {document_path}")
