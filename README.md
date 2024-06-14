@@ -13,13 +13,13 @@ To run the program, enter the following command:
 
     python apply.py 
     
-    When the GUI appears, first copy and paste a URL to a job listing in the "Enter Job Listing URL" text box.
+When the GUI appears, first copy and paste a URL to a job listing in the "Enter Job Listing URL" text box.
 
-    Next upload a pdf of a resume using the "Upload File" button to choose a file from your file system.
+Next upload a pdf of a resume using the "Upload File" button to choose a file from your file system.
 
-    Lastly, click the "Process" button. The program will run in the background.
-    
-    Progress can be kept track of using the LED indicators. When all are green, the process and testing has completed
+Lastly, click the "Process" button. The program will run in the background.
+
+Progress can be kept track of using the LED indicators. When all are green, the process and testing has completed
 
 Results are saved in the _**results**_ folder.
 
