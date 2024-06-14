@@ -11,6 +11,9 @@ import threading
 from openai import OpenAI
 client = OpenAI()
 
+OPENAI_API_KEY="sk-proj-wRwdtX1nYv5x78n5ehrhT3BlbkFJCKh8jSStWV9iyjwUS8cN"
+OpenAI.api_key=OPENAI_API_KEY
+
 warnings.filterwarnings("ignore", message=".*CTkImage.*HighDPI displays.*")
 
 ctk.set_appearance_mode("Dark")      # GUI theme
