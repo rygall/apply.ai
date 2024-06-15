@@ -56,7 +56,7 @@ class App(ctk.CTk):
         self.process_button.pack(pady=20)
 
         # Progress LED Indicators
-        background_color = "#2b2b2b"  # This is an example, replace with the actual color
+        background_color = "#2b2b2b"
         self.led_frame = ctk.CTkFrame(self)
         self.led_frame.pack(pady=10)
         self.leds = []
@@ -66,7 +66,7 @@ class App(ctk.CTk):
             led_label = ctk.CTkLabel(self.led_frame, text=self.led_labels[i])
             led_label.pack(side=tk.LEFT, padx=5)
 
-            # Make Canvas background same as gui background
+            # Canvas background same as gui
             led_canvas = tk.Canvas(self.led_frame, width=20, height=20, bg=background_color, highlightthickness=0)
             led_canvas.pack(side=tk.LEFT, padx=5)
 
