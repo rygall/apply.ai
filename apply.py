@@ -66,11 +66,11 @@ class App(ctk.CTk):
             led_label = ctk.CTkLabel(self.led_frame, text=self.led_labels[i])
             led_label.pack(side=tk.LEFT, padx=5)
 
-            # Create a canvas for the LED with the same background color as your GUI
+            # Make Canvas background same as gui background
             led_canvas = tk.Canvas(self.led_frame, width=20, height=20, bg=background_color, highlightthickness=0)
             led_canvas.pack(side=tk.LEFT, padx=5)
 
-            # Draw a circle on the canvas to represent the LED
+            # Draw a circle for LEDs
             led = led_canvas.create_oval(5, 5, 15, 15, fill="red", outline="black")
             self.leds.append(led)
 
@@ -219,7 +219,7 @@ class App(ctk.CTk):
         # Convert URL job Listing to Text
         listing = self.extract_listing(url)
         
-        # Tokenize the job listing text
+        # Tokenize job listing text
         encoding = tiktoken.get_encoding("o200k_base")
         num_tokens = len(encoding.encode(listing))
         
@@ -231,11 +231,11 @@ class App(ctk.CTk):
         return text
 
     def extract_listing(self, url):
-        # initialize a new browser (in this case, we're using Chrome)
+        # initialize chrome
         browser = webdriver.Chrome()
-        # tell the browser to retrieve the content of the url
+        # retrieve url content
         browser.get(str(url))
-        # get the page source and parse it with BeautifulSoup
+        # Parse page
         soup = BeautifulSoup(browser.page_source, 'html.parser')
         return soup.text
 
@@ -321,9 +321,9 @@ class App(ctk.CTk):
                 self.output_box.insert(tk.END, output_text)
         self.output_box.configure(state='disabled')
 
-        self.qual_percentage_box.configure(state='normal')  # Change state to 'normal'
-        self.qual_percentage_box.delete(1.0, 'end')  # Clear the box
-        self.qual_percentage_box.insert('end', str(round(res_score))+"%")  # Insert new data
+        self.qual_percentage_box.configure(state='normal')
+        self.qual_percentage_box.delete(1.0, 'end')
+        self.qual_percentage_box.insert('end', str(round(res_score))+"%")
         self.qual_percentage_box.configure(state='disabled')
 
         print("Generated Applicant Match Score:", res_score, "%")
@@ -423,8 +423,7 @@ class App(ctk.CTk):
     def change_led_color(self, led_index, new_color):
         # Get the canvas that contains the LED
         led_canvas = self.led_frame.winfo_children()[led_index * 2 + 1]
-
-        # Change the color of the LED
+        # Change LED Color
         led_canvas.itemconfig(self.leds[led_index], fill=new_color)
 
     def update_test_box(self, box_index, value):
@@ -432,12 +431,6 @@ class App(ctk.CTk):
         box.configure(state='normal')
         box.delete(1.0, tk.END)
         box.insert(tk.END, str(value))
-       # if 0 <= value < 8.5:
-       #     box.configure(background='red')
-       # elif 8.5 <= value < 17.5:
-       #     box.configure(background='yellow')
-       # elif 18 <= value <= 26:
-       #     box.configure(background='green')
         box.configure(state='disabled')
 
 

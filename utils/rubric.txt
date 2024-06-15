@@ -10,5 +10,5 @@ WEAK ACTION VERBS XX/25
 Weak action verbs should be graded higher with the less weak action verbs that are used.
 
 ACCOMPLISHMENT-ORIENTED VERBS XX/25
-Accomplishment oriented verbs verbs should be graded higher with more well implmeneted action oriented verbs that are used.
+Accomplishment oriented verbs should be graded higher with more well implemented action oriented verbs that are used.
 
