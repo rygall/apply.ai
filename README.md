@@ -8,6 +8,9 @@
     cd apply.ai
     pip install -r requirements.txt
 
+## Enter the OPENAI Key
+    We provided an OPENAI key in the submission comments. Please place that key into Line 14 of apply.py.
+
 # Running the Program
 To run the program, enter the following command:
 
